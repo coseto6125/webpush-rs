@@ -22,11 +22,12 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          # manylinux_2_28, not 2014: vendored OpenSSL needs a perl new enough to
-          # configure OpenSSL 3.x from source, which the 2014 image's perl is too
-          # old for ('perl reported failure exit status 2'). 2_28 still covers our
-          # aarch64 prod (glibc 2.39) and any reasonably modern Linux.
+          # manylinux_2_28 (AlmaLinux) covers our aarch64 prod (glibc 2.39).
           manylinux: "2_28"
+          # Vendored OpenSSL 3.x's Configure needs the perl IPC::Cmd module,
+          # which the base image lacks ('Can't locate IPC/Cmd.pm'). Install it
+          # before the build. dnf is present on the 2_28 AlmaLinux image.
+          before-script-linux: "dnf install -y perl-IPC-Cmd perl-FindBin || yum install -y perl-IPC-Cmd perl-FindBin"
           args: --release --out dist -m crates/webpush-rs/Cargo.toml
       - uses: actions/upload-artifact@v4
         with:
