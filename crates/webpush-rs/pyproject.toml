@@ -1,0 +1,29 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "webpush-rs"
+dynamic = ["version"]
+description = "Fast Web Push (VAPID + AES128GCM) for Python — Rust web-push crate behind a PyO3 binding"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT OR Apache-2.0" }
+authors = [{ name = "coseto6125" }]
+keywords = ["web-push", "vapid", "push-notification", "pwa", "rust"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Internet :: WWW/HTTP",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+Repository = "https://github.com/coseto6125/webpush-rs"
+
+[tool.maturin]
+# Python module name matches #[pymodule] fn webpush_rs. abi3 = one wheel per
+# platform across CPython 3.8+.
+module-name = "webpush_rs"
+features = ["pyo3/extension-module"]
+manifest-path = "Cargo.toml"

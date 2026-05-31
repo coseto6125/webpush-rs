@@ -1,0 +1,30 @@
+[package]
+name = "webpush-rs"
+version.workspace = true
+edition = "2021"
+license.workspace = true
+description = "Fast Web Push (VAPID + AES128GCM) for Python — Rust web-push crate behind a PyO3 binding"
+
+[lib]
+name = "webpush_rs"
+crate-type = ["cdylib", "rlib"]
+
+# Dev-only benchmark; gated behind the `bench` feature so the published wheel
+# doesn't ship it. Build with: cargo build --release --features bench --bin bench
+[[bin]]
+name = "bench"
+path = "src/bench.rs"
+required-features = ["bench"]
+
+[dependencies]
+# hyper-client: pure-Rust HTTP backend (hyper + hyper-tls), avoids libcurl/isahc.
+web-push = { version = "0.11", default-features = false, features = ["hyper-client"] }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
+pyo3 = { version = "0.23", features = ["abi3-py38", "extension-module"], optional = true }
+# vendored OpenSSL: static-link so the ARM wheel is portable (hyper-tls -> openssl).
+openssl = { version = "0.10", features = ["vendored"] }
+
+[features]
+default = ["python"]
+python = ["dep:pyo3"]
+bench = []

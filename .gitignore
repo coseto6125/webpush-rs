@@ -1,0 +1,7 @@
+/target
+**/*.rs.bk
+Cargo.lock
+dist/
+*.so
+__pycache__/
+.venv/
