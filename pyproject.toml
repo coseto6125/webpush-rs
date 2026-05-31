@@ -26,4 +26,3 @@ Repository = "https://github.com/coseto6125/webpush-rs"
 # platform across CPython 3.8+.
 module-name = "webpush_rs"
 features = ["pyo3/extension-module"]
-manifest-path = "Cargo.toml"
