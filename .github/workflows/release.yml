@@ -32,10 +32,13 @@ jobs:
           # script is sourced into the same shell that then runs maturin, so an
           # early exit would skip the build entirely (that silently shipped an
           # x86_64 job with no wheel). Just run the first manager that exists.
+          # IPC::Cmd + Time::Piece are both required by OpenSSL 3.x's Configure
+          # and absent from the manylinux_2_28 x86_64 image.
           before-script-linux: |
-            if command -v dnf; then dnf install -y perl-IPC-Cmd
-            elif command -v microdnf; then microdnf install -y perl-IPC-Cmd
-            elif command -v yum; then yum install -y perl-IPC-Cmd
+            pkgs="perl-IPC-Cmd perl-Time-Piece"
+            if command -v dnf; then dnf install -y $pkgs
+            elif command -v microdnf; then microdnf install -y $pkgs
+            elif command -v yum; then yum install -y $pkgs
             fi
           args: --release --out dist
       - uses: actions/upload-artifact@v4
