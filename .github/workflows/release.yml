@@ -15,6 +15,8 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     strategy:
+      # Independent targets — don't let aarch64 (QEMU) cancel a healthy x86_64.
+      fail-fast: false
       matrix:
         target: [x86_64, aarch64]
     steps:
@@ -25,9 +27,15 @@ jobs:
           # manylinux_2_28 (AlmaLinux) covers our aarch64 prod (glibc 2.39).
           manylinux: "2_28"
           # Vendored OpenSSL 3.x's Configure needs the perl IPC::Cmd module,
-          # which the base image lacks ('Can't locate IPC/Cmd.pm'). perl-FindBin
-          # has no separate package on AlmaLinux 8, so install only IPC-Cmd.
-          before-script-linux: "dnf install -y perl-IPC-Cmd || yum install -y perl-IPC-Cmd"
+          # which the base image lacks ('Can't locate IPC/Cmd.pm'). The package
+          # manager differs across the per-arch images (x86_64 has dnf; some
+          # aarch64 images only have microdnf or yum) — try each, never fail the
+          # step on a missing manager.
+          before-script-linux: |
+            command -v dnf && dnf install -y perl-IPC-Cmd && exit 0
+            command -v microdnf && microdnf install -y perl-IPC-Cmd && exit 0
+            command -v yum && yum install -y perl-IPC-Cmd && exit 0
+            true
           args: --release --out dist -m crates/webpush-rs/Cargo.toml
       - uses: actions/upload-artifact@v4
         with:
