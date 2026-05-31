@@ -28,13 +28,15 @@ jobs:
           manylinux: "2_28"
           # Vendored OpenSSL 3.x's Configure needs the perl IPC::Cmd module,
           # which the base image lacks ('Can't locate IPC/Cmd.pm'). The package
-          # manager differs across the per-arch images — try each, never fail the
-          # step on a missing manager.
+          # manager differs across per-arch images. NOTE: no `exit 0` here — this
+          # script is sourced into the same shell that then runs maturin, so an
+          # early exit would skip the build entirely (that silently shipped an
+          # x86_64 job with no wheel). Just run the first manager that exists.
           before-script-linux: |
-            command -v dnf && dnf install -y perl-IPC-Cmd && exit 0
-            command -v microdnf && microdnf install -y perl-IPC-Cmd && exit 0
-            command -v yum && yum install -y perl-IPC-Cmd && exit 0
-            true
+            if command -v dnf; then dnf install -y perl-IPC-Cmd
+            elif command -v microdnf; then microdnf install -y perl-IPC-Cmd
+            elif command -v yum; then yum install -y perl-IPC-Cmd
+            fi
           args: --release --out dist
       - uses: actions/upload-artifact@v4
         with:
