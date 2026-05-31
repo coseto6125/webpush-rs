@@ -22,8 +22,11 @@ jobs:
       - uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          # vendored OpenSSL is compiled in, so manylinux2014 stays portable.
-          manylinux: "2014"
+          # manylinux_2_28, not 2014: vendored OpenSSL needs a perl new enough to
+          # configure OpenSSL 3.x from source, which the 2014 image's perl is too
+          # old for ('perl reported failure exit status 2'). 2_28 still covers our
+          # aarch64 prod (glibc 2.39) and any reasonably modern Linux.
+          manylinux: "2_28"
           args: --release --out dist -m crates/webpush-rs/Cargo.toml
       - uses: actions/upload-artifact@v4
         with:
